@@ -1,17 +1,21 @@
 import random
 import sys
 from faker import Faker
-from bootstrap_table import db, User
+from api import db, User
 
 def create_fake_users(n):
     """Generate fake users."""
     faker = Faker()
+    team_members_choices = ['dpo', 'IG Member', 'Work Council', 'Legal Member']
     for i in range(n):
         user = User(name = faker.name(), 
                     age = random.randint(20, 80), 
                     address = faker.address().replace('\n',', '),
                     phone = faker.phone_number(),
-                    email = faker.email()
+                    email = faker.email(),
+                    country = faker.country(),
+                    date_of_birth = faker.date_time(),
+                    team_member = random.choice(team_members_choices)
                     )
         db.session.add(user)
     db.session.commit()

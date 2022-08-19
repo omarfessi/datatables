@@ -1,0 +1,142 @@
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>
+      DataTable Inline Editing using Python Flask MySQLdb jquery ajax and
+      X-Editable
+    </title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <!--this is jquery core lib -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+    />
+    <!-- bootstrap css styling -->
+    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script> bootstrap css js to make component work,  it will be included at the end-->
+
+    <!-- !!!!!!data tables imports start from here!!!!!! https://datatables.net/examples/styling/bootstrap.html -->
+    <!-- jquery datatable and datatables bootstrap libraries js and a css files -->
+    <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+    <!--jquery core has been imported before, this line is to import jquery.datatable -->
+    <script src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
+    <!-- datatables.bootstrap.js : dependency to make datatable work -->
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css"
+    />
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <!-- this line was imported before (commented)  -->
+
+    <!-- X-Editable starts from here -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/js/bootstrap-editable.js"></script>
+
+    <link rel="stylesheet" href="css/styles.css" />
+
+    <script type="text/javascript" language="javascript">
+      $.fn.editable.defaults.mode = 'inline';
+      $(document).ready(function () {
+        var dataTable = $("#sample_data").DataTable({scrollX: true});
+        $("#sample_data").editable({
+          container: "body",
+          selector: "td.name",
+          url: "/updateemployee",
+          title: "Name",
+          type: "POST",
+          validate: function (value) {
+            if ($.trim(value) == "") {
+              return "This field is required";
+            }
+          },
+        });
+        $("#sample_data").editable({
+          value: 2,
+          selector: "td.is_monitored",
+          source: [
+            { value: 1, text: "True" },
+            { value: 2, text: "False" },
+          ],
+        });
+        $("#sample_data").editable({
+          selector: "td.birth_date",
+          format: 'yyyy-mm-dd',
+          viewformat: 'dd/mm/yyyy',
+          datepicker: {
+                weekStart: 1
+           }
+        });
+        $('#sample_data').editable({
+          
+        selector: "td.team_member",
+        value: 1,  
+        source: [
+              {value: 1, text: 'DPO'},
+              {value: 2, text: 'IG Member'},
+              {value: 3, text: 'Work Council'},
+              {value: 4, text: 'Legal Member'}
+              
+           ]
+    })
+      });
+    </script>
+  </head>
+
+  <body>
+    <div class="container">
+      <h3 align="center">All DAta Golden Employees Source</h3>
+      <br />
+      <!-- <div class="panel panel-default">  -->
+      <!-- <div class="panel-heading"> DataTable</div> -->
+      <div class="panel-body">
+        <div class="table-responsive">
+          <table
+            id="sample_data"
+            class="table no-border-bottom table-striped text-color display nowrap"
+            style="width:100%"
+          >
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>NAME</th>
+                <th>AGE</th>
+                <th>ADDRESS</th>
+                <th>PHONE</th>
+                <th>EMAIL</th>
+                <th>COUNTRY</th>
+                <th>BIRTH_DATE</th>
+                <th>MONITORED</th>
+                <th>TEAM_MEMBER</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for user in users%}
+              <tr>
+                <td data-pk="{{user.id}}">{{user.id}}</td>
+                <td data-name="name" class="name" style="border-bottom: none !important" data-type="text" data-pk="{{user.id}}">
+                  {{user.name}}
+                </td>
+                <td>{{user.age}}</td>
+                <td>{{user.address}}</td>
+                <td>{{user.phone}}</td>
+                <td>{{user.email}}</td>
+                <td>{{user.country}}</td>
+                <td class="birth_date" style="border-bottom: none !important;" data-type="date"  data-pk="{{user.id}}" >{{user.date_of_birth.date()}}</td>
+                <td class="is_monitored" style=" border-bottom: none !important;" data-type="select" data-pk="{{user.id}}">{{user.is_monitored}}</td>
+                <td class="team_member" style=" border-bottom: none !important;" data-type="checklist" data-pk="{{user.id}}"> {{user.team_member}}</td>
+            </tr>
+              {%endfor%}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- </div>  -->
+    </div>
+    <br />
+    <br />
+  </body>
+</html>
