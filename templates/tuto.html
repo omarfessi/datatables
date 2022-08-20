@@ -42,44 +42,41 @@
       $.fn.editable.defaults.mode = 'inline';
       $(document).ready(function () {
         var dataTable = $("#sample_data").DataTable({scrollX: true});
-        $("#sample_data").editable({
-          container: "body",
-          selector: "td.name",
-          url: "/updateemployee",
-          title: "Name",
-          type: "POST",
+        $(".name").editable({
           validate: function (value) {
             if ($.trim(value) == "") {
               return "This field is required";
             }
           },
+        
         });
-        $("#sample_data").editable({
-          value: 2,
-          selector: "td.is_monitored",
+        $(".team_member").editable({
+          value: 1,  
+          source: [
+                {value: 1, text: 'DPO'},
+                {value: 2, text: 'IG Member'},
+                {value: 3, text: 'Work Council'},
+                {value: 4, text: 'Legal Member'}
+                
+            ]
+
+        })
+
+        $(".is_monitored").editable({
+          value: 1,
           source: [
             { value: 1, text: "True" },
             { value: 2, text: "False" },
           ],
         });
-        $("#sample_data").editable({
-          selector: "td.birth_date",
-          format: 'yyyy-mm-dd',
-          viewformat: 'dd/mm/yyyy',
-          datepicker: {
-                weekStart: 1
-           }
-        });
-        $('#sample_data').editable({
-          
-        selector: "td.team_member",
+
+        $('.team_member').editable({
         value: 1,  
         source: [
               {value: 1, text: 'DPO'},
               {value: 2, text: 'IG Member'},
               {value: 3, text: 'Work Council'},
               {value: 4, text: 'Legal Member'}
-              
            ]
     })
       });
@@ -125,7 +122,7 @@
                 <td>{{user.phone}}</td>
                 <td>{{user.email}}</td>
                 <td>{{user.country}}</td>
-                <td class="birth_date" style="border-bottom: none !important;" data-type="date"  data-pk="{{user.id}}" >{{user.date_of_birth.date()}}</td>
+                <td>{{user.date_of_birth.date()}}</td>
                 <td class="is_monitored" style=" border-bottom: none !important;" data-type="select" data-pk="{{user.id}}">{{user.is_monitored}}</td>
                 <td class="team_member" style=" border-bottom: none !important;" data-type="checklist" data-pk="{{user.id}}"> {{user.team_member}}</td>
             </tr>
