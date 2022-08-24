@@ -41,50 +41,121 @@
     <script type="text/javascript" language="javascript">
       $.fn.editable.defaults.mode = 'inline';
       $(document).ready(function () {
-        var dataTable = $("#sample_data").DataTable({scrollX: true});
-        $(".name").editable({
-          validate: function (value) {
-            if ($.trim(value) == "") {
-              return "This field is required";
+        var dataTable = $("#sample_data").DataTable({
+		      serverSide: true,
+          ajax: '/api/data',
+          scrollX: true,
+          columnDefs: [ { "defaultContent": "-", "targets": "_all" } ],
+          
+          columns: [
+            {data: 'id'},
+            {data: 'name'},
+            {data: 'age'},
+            {data: 'address', orderable: false},
+            {data: 'phone', orderable: false},
+            {data: 'email'},
+            {data: 'country'},
+            {data: 'date_of_birth'},
+            {data: 'team_member'},
+            {data: 'is_monitored'},
+            ],
+          createdRow:function(row, data, rowIndex)
+          {
+            $.each($('td', row), function(colIndex){
+              if(colIndex == 1)
+              {
+                $(this).attr('data-name', 'name');
+                $(this).attr('class', 'name');
+                $(this).attr('data-type', 'text');
+                $(this).attr('data-pk', data['id']);
+              }
+
+              if(colIndex == 9)
+              {
+                $(this).attr('data-name', 'monitored'); // this is karg to retreive from request name will be equal to monitored
+                $(this).attr('class', 'monitored');
+                $(this).attr('data-type', 'select');
+                $(this).attr('data-pk', data['id']);
+              }
+            })
+          }
+        });
+
+        $('#sample_data').editable({
+          container:'body',
+          selector:'td.name',
+          url:'/api/updateemployee',
+          title:'Name',
+          type:'POST',
+          validate:function(value){
+            if($.trim(value) == '')
+            {
+              return 'This field is required';
             }
-          },
+          }
+        });
         
-        });
-        $(".team_member").editable({
-          value: 1,  
-          source: [
-                {value: 1, text: 'DPO'},
-                {value: 2, text: 'IG Member'},
-                {value: 3, text: 'Work Council'},
-                {value: 4, text: 'Legal Member'}
+    //     $(".name").editable({
+    //       validate: function (value) {
+    //         if ($.trim(value) == "") {
+    //           return "This field is required";
+    //         }
+    //       },
+        
+    //     });
+    //     $(".team_member").editable({
+    //       value: 1,  
+    //       source: [
+    //             {value: 1, text: 'DPO'},
+    //             {value: 2, text: 'IG Member'},
+    //             {value: 3, text: 'Work Council'},
+    //             {value: 4, text: 'Legal Member'}
                 
-            ]
+    //         ]
 
-        })
+    //     })
 
-        $(".is_monitored").editable({
-          value: 1,
+        $('#sample_data').editable({
+          container:'body',
+          selector:'td.monitored',
+          datatype: 'json',
           source: [
-            { value: 1, text: "True" },
-            { value: 2, text: "False" },
+            { value: 1, text: "true" },
+            { value: 2, text: "false" },
           ],
+          url:'/api/updateemployee',
+          title:'Monitored', //  not title sent to endpoint instead it is monitored 
+          type:'POST',
+          validate:function(value){
+            if($.trim(value) == '')
+            {
+              return 'This field is required';
+            }
+          }
         });
 
-        $('.team_member').editable({
-        value: 1,  
-        source: [
-              {value: 1, text: 'DPO'},
-              {value: 2, text: 'IG Member'},
-              {value: 3, text: 'Work Council'},
-              {value: 4, text: 'Legal Member'}
-           ]
-    })
+    //     $('.team_member').editable({
+    //     value: 1,  
+    //     source: [
+    //           {value: 1, text: 'DPO'},
+    //           {value: 2, text: 'IG Member'},
+    //           {value: 3, text: 'Work Council'},
+    //           {value: 4, text: 'Legal Member'}
+    //        ]
+    // })
       });
     </script>
   </head>
 
   <body>
     <div class="container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}"> {{ message }} </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
       <h3 align="center">All DAta Golden Employees Source</h3>
       <br />
       <!-- <div class="panel panel-default">  -->
@@ -106,27 +177,11 @@
                 <th>EMAIL</th>
                 <th>COUNTRY</th>
                 <th>BIRTH_DATE</th>
-                <th>MONITORED</th>
                 <th>TEAM_MEMBER</th>
+                <th>MONITORED</th>
               </tr>
             </thead>
             <tbody>
-              {% for user in users%}
-              <tr>
-                <td data-pk="{{user.id}}">{{user.id}}</td>
-                <td data-name="name" class="name" style="border-bottom: none !important" data-type="text" data-pk="{{user.id}}">
-                  {{user.name}}
-                </td>
-                <td>{{user.age}}</td>
-                <td>{{user.address}}</td>
-                <td>{{user.phone}}</td>
-                <td>{{user.email}}</td>
-                <td>{{user.country}}</td>
-                <td>{{user.date_of_birth.date()}}</td>
-                <td class="is_monitored" style=" border-bottom: none !important;" data-type="select" data-pk="{{user.id}}">{{user.is_monitored}}</td>
-                <td class="team_member" style=" border-bottom: none !important;" data-type="checklist" data-pk="{{user.id}}"> {{user.team_member}}</td>
-            </tr>
-              {%endfor%}
             </tbody>
           </table>
         </div>

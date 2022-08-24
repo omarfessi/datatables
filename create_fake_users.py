@@ -6,7 +6,7 @@ from api import db, User
 def create_fake_users(n):
     """Generate fake users."""
     faker = Faker()
-    team_members_choices = ['dpo', 'IG Member', 'Work Council', 'Legal Member']
+    team_members_choices = ['DPO', 'IG Member', 'Work Council', 'Legal Member']
     for i in range(n):
         user = User(name = faker.name(), 
                     age = random.randint(20, 80), 
