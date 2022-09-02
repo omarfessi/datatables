@@ -1,0 +1,300 @@
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>
+      DataTable Inline Editing using Python Flask MySQLdb jquery ajax and
+      X-Editable
+    </title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <!--this is jquery core lib -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+    />
+    <!-- bootstrap css styling -->
+    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script> bootstrap css js to make component work,  it will be included at the end-->
+
+    <!-- !!!!!!data tables imports start from here!!!!!! https://datatables.net/examples/styling/bootstrap.html -->
+    <!-- jquery datatable and datatables bootstrap libraries js and a css files -->
+    <script src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script> 
+    <!--jquery core has been imported before, this line is to import jquery.datatable -->
+    <script src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
+    <!-- datatables.bootstrap.js : dependency to make datatable work -->
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.datatables.net/1.10.12/css/dataTables.bootstrap.min.css"
+      
+    />
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <!-- this line was imported before (commented)  -->
+
+    <!-- X-Editable starts from here -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/css/bootstrap-editable.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.1/bootstrap3-editable/js/bootstrap-editable.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://github.com/downloads/lafeber/world-flags-sprite/flags32.css"/>
+    <link rel="stylesheet" href="../static/css/styles.css" />
+    <!-- <link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css"> -->
+
+    <script type="text/javascript" language="javascript">
+      $.fn.editable.defaults.mode = 'inline';
+      $(document).ready(function () {
+        var dataTable = $("#sample_data").DataTable({
+		      serverSide: true,
+          ajax: '/api/data',
+          stateSave: true,
+          scrollX: true,
+
+          columnDefs: [
+            {  
+              targets: 0,
+              render: function (data, type, row, meta) {
+                  return '<input type="button" class="btn-id" value="' + data + '"/>'
+                  '<a href="';
+                }
+
+            },
+            { "defaultContent": "-", "targets": "_all" } ],
+          
+          columns: [
+            {data: 'id'},
+            {data: 'name'},
+            {data: 'age'},
+            {data: 'address', orderable: false},
+            {data: 'phone', orderable: false},
+            {data: 'email'},
+            {data: 'country',
+              className: 'f32', // used by world-flags-sprite library
+              
+              render: function (data, type) {
+                  if (type === 'display') {
+                      let country = '';
+
+                      switch (data) {
+                          case 'Cameroon':
+                              country = 'cm';
+                              break;
+                          case 'China':
+                              country = 'ch';
+                              break;
+                          case 'South Africa':
+                              country = 'za';
+                              break;
+                          case 'France':
+                          case 'Guadeloupe':
+                              country = 'fr';
+                              break;
+                          case 'Liechtenstein':
+                              country = 'li';
+                              break;
+                          case 'Colombia':
+                              country = 'co';
+                              break;
+                          case 'Somalia':
+                              country = 'so'
+                              break;
+                          case 'Tokelau':
+                              country = 'tk'
+                              break;
+                          case 'Guadeloupe':
+                              country = 'gp'
+                              break;
+                          case 'Puerto Rico':
+                              country = 'pr'
+                              break;
+                      }
+
+                      return '<span class="flag ' + country + '"></span> ' + data;
+                  }
+
+                  return data;
+              },
+            },
+            {data: 'date_of_birth'},
+            {data: 'team_member'},
+            {data: 'is_monitored'},
+            ],
+          order: [[0, 'desc']],
+          // Add event listener for opening and closing details
+      
+          createdRow:function(row, data, rowIndex)
+          {
+            $.each($('td', row), function(colIndex){
+
+              if(colIndex == 0)
+              {
+                $(this).attr('data-name', 'id');
+                $(this).attr('class', 'test');
+                $(this).attr('id', 'id');
+                $(this).attr('data-pk', data['id']);
+              }
+
+              if(colIndex == 1)
+              {
+                $(this).attr('data-name', 'name');
+                $(this).attr('class', 'name');
+                $(this).attr('data-type', 'text');
+                $(this).attr('data-pk', data['id']);
+              }
+
+              if(colIndex == 9)
+              {
+                $(this).attr('data-name', 'monitored'); // this is karg to retreive from request name will be equal to monitored
+                $(this).attr('class', 'monitored');
+                $(this).attr('data-type', 'select');
+                $(this).attr('data-pk', data['id']);
+              }
+            })
+          }
+        });
+        // this part is to send request to backend audit trail
+        
+
+        $('#sample_data').on('click', '.test', function() {
+          // get textContent of the TD
+          var uid = dataTable.row(this).data()['id']
+          console.log('TD cell textContent : ', uid);
+          var post = $.ajax({
+            url: "/api/audittrail",
+            type: "GET",
+            data: {employeeuid:uid},
+            success:function(data){
+              $('.modal-body').html(data);
+              $('.modal-body').append(data.htmlresponse);
+              $('#empModal').modal('show');
+            }
+              
+          });
+       });
+
+        $('#sample_data').editable({
+          container:'body',
+          selector:'td.name',
+          url:'/api/updateemployee',
+          title:'Name',
+          type:'POST',
+          validate:function(value){
+            if($.trim(value) == '')
+            {
+              return 'This field is required';
+            }
+          }
+        });
+
+        $('#sample_data').editable({
+          container:'body',
+          selector:'td.monitored',
+          datatype: 'json',
+          source: [
+            { value: 1, text: "true" },
+            { value: 2, text: "false" },
+          ],
+          url:'/api/updateemployee',
+          title:'Monitored', //  not title sent to endpoint instead it is monitored 
+          type:'POST',
+          validate:function(value){
+            if($.trim(value) == '')
+            {
+              return 'This field is required';
+            }
+          }
+        });
+
+        // toggle the visibility
+        $('a.toggle-vis').on('click', function (e) {
+        e.preventDefault();
+        // Get the column API object
+        var column = dataTable.column($(this).attr('data-column'));
+ 
+        // Toggle the visibility
+        column.visible(!column.visible());
+        });
+      });
+    </script>
+  </head>
+
+  <body>
+    <div class="container">
+      <h3 align="center">All DAta Golden Employees Source</h3>
+      <br />
+      <!-- <div class="panel panel-default">  -->
+      <!-- <div class="panel-heading"> DataTable</div> -->
+      <div class="panel-body">
+        <div class="table-responsive">
+          <button id="button">Unnotify</button>
+          <button id="button">Archive</button>
+          <table
+            id="sample_data"
+            class="table no-border-bottom table-striped text-color display nowrap"
+            style="width:100%"
+          >
+            <thead>
+              <tr>
+                <!-- <th></th> -->
+                <th>ID</th>
+                <th>NAME</th>
+                <th>AGE</th>
+                <th>ADDRESS</th>
+                <th>PHONE</th>
+                <th>EMAIL</th>
+                <th>COUNTRY</th>
+                <th>BIRTH_DATE</th>
+                <th>TEAM_MEMBER</th>
+                <th>MONITORED</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+            <tfoot>
+              <tr>
+                <!-- <th></th> -->
+                <th>ID</th>
+                <th>NAME</th>
+                <th>AGE</th>
+                <th>ADDRESS</th>
+                <th>PHONE</th>
+                <th>EMAIL</th>
+                <th>COUNTRY</th>
+                <th>BIRTH_DATE</th>
+                <th>TEAM_MEMBER</th>
+                <th>MONITORED</th>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+      <div>
+        Toggle column: <a class="toggle-vis" data-column="1">NAME</a> - 
+                       <a class="toggle-vis" data-column="2">AGE</a> - 
+                       <a class="toggle-vis" data-column="3">ADDRESS</a> - 
+                       <a class="toggle-vis" data-column="4">PHONE</a> - 
+                       <a class="toggle-vis" data-column="5">EMAIL </a> - 
+                       <a class="toggle-vis" data-column="6">COUNTRY</a> -
+                       <a class="toggle-vis" data-column="7">BIRTH_DATE</a> -
+                       <a class="toggle-vis" data-column="8">TEAM_MEMBER</a> -
+                       <a class="toggle-vis" data-column="9">MONITORED</a> 
+      </div>
+    </div>
+    
+    <br />
+    <br />
+
+    <div class="modal fade" id="empModal" role="dialog">
+      <div class="modal-dialog">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h4 class="modal-title">Employee's Audit Trail Info</h4>
+                <button type="button" class="close" data-dismiss="modal">×</button>
+              </div>
+              <div class="modal-body">
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+          </div>
+  </body>
+</html>
