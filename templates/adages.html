@@ -53,7 +53,30 @@
             {  
               targets: 0,
               render: function (data, type, row, meta) {
-                  return '<input type="button" class="btn-id" value="' + data + '"/>'
+                  var adages_lifecycle = row['adages_lifecycle'] 
+                  
+                  // if (type === 'display') {
+                    let lifecycle_color = '';
+                    switch (adages_lifecycle){
+                      case 0:
+                        lifecycle_color = 'secondary';
+                        break;
+                      case 1:
+                        lifecycle_color = 'primary';
+                        break;
+                      case 2:
+                        lifecycle_color = 'success';
+                        break;
+                      case 3:
+                        lifecycle_color = 'warning';
+                        break;
+                      case 4:
+                        lifecycle_color = 'danger';
+                        break;
+                    }
+
+                  // }
+                  return '<input type="button" class="btn-id btn btn-'+lifecycle_color+'" value="' + data + '"/>'
                   '<a href="';
                 }
 
@@ -117,6 +140,8 @@
             {data: 'date_of_birth'},
             {data: 'team_member'},
             {data: 'is_monitored'},
+            {data: 'adages_lifecycle'},
+              
             ],
           order: [[0, 'desc']],
           // Add event listener for opening and closing details
@@ -157,7 +182,8 @@
         $('#sample_data').on('click', '.test', function() {
           // get textContent of the TD
           var uid = dataTable.row(this).data()['id']
-          console.log('TD cell textContent : ', uid);
+          var lifecycle = dataTable.row(this).data()['adages_lifecycle']
+          console.log('TD cell textContent : ', uid, lifecycle);
           var post = $.ajax({
             url: "/api/audittrail",
             type: "GET",
@@ -245,6 +271,7 @@
                 <th>BIRTH_DATE</th>
                 <th>TEAM_MEMBER</th>
                 <th>MONITORED</th>
+                <th>ADAGES_LIFECYCLE</th>
               </tr>
             </thead>
             <tbody>
@@ -262,6 +289,7 @@
                 <th>BIRTH_DATE</th>
                 <th>TEAM_MEMBER</th>
                 <th>MONITORED</th>
+                <th>ADAGES_LIFECYCLE</th>
               </tr>
             </tfoot>
           </table>
@@ -277,6 +305,7 @@
                        <a class="toggle-vis" data-column="7">BIRTH_DATE</a> -
                        <a class="toggle-vis" data-column="8">TEAM_MEMBER</a> -
                        <a class="toggle-vis" data-column="9">MONITORED</a> 
+                       <a class="toggle-vis" data-column="10">ADAGES_LIFECYCLE</a> 
       </div>
     </div>
     

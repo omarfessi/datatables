@@ -8,7 +8,6 @@ from datetime import datetime
 from sqlalchemy import select, desc #is not necessary as I am using flask_sqlalchemy 
 import pandas as pd
 
-
 app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:admin@localhost:5432/adages' #conString = "postgres://YourUserName:YourPassword@YourHostname:5432/YourDatabaseName";
@@ -16,10 +15,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = "super secret key"
 
 db = SQLAlchemy(app)
-
 migrate = Migrate(app, db)
-
-
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -32,10 +28,8 @@ class User(db.Model):
     date_of_birth = db.Column(db.DateTime, nullable=True)
     team_member = db.Column(db.String(30), nullable = False)
     is_monitored = db.Column(db.Boolean, default=False, nullable=False)
-
-    # is_monitored = db.Column(db.Boolean, server_default=expression.true(), nullable=False)
-    # is_monitored = db.Column(db.Boolean, default=False, nullable=False)
-    shows=db.relationship('UserHistory', backref='artist', lazy=True)
+    adages_lifecycle = db.Column(db.Integer)
+    shows=db.relationship('UserHistory', backref='employee', lazy=True)
 
 
     def __repr__(self):
@@ -52,7 +46,8 @@ class User(db.Model):
             'country':self.country,
             'date_of_birth': self.date_of_birth,
             'team_member': self.team_member,
-            'is_monitored':self.is_monitored
+            'is_monitored':self.is_monitored,
+            'adages_lifecycle':self.adages_lifecycle
         }
 
 class UserHistory(db.Model):
@@ -69,15 +64,11 @@ class UserHistory(db.Model):
     date_of_birth = db.Column(db.DateTime, nullable=True)
     team_member = db.Column(db.String(30), nullable = False)
     is_monitored = db.Column(db.Boolean, default=False, nullable=False)
+    adages_lifecycle = db.Column(db.Integer)
     refresh_datetime = db.Column(db.DateTime, nullable=False)
 
     def __repr__(self):
         return f"UserHist('{self.uid}', '{self.name}', '{self.age}', '{self.address}', '{self.phone}', '{self.email}', '{self.country}', '{self.date_of_birth}', '{self.team_member}', '{self.is_monitored}') "
-    
-
-# db.create_all()
-
-
 
 @app.route('/')
 def index():
@@ -167,8 +158,7 @@ def showAuditTrail():
         if modified_columns : 
             modification['MODIFIED_COLUMNS']=modified_columns
             audit_trail.append(modification)
-
-    print (audit_trail)
+            
     return jsonify({'htmlresponse': render_template('response.html', audit_trail=audit_trail)})
         
 
