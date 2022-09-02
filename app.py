@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from sqlalchemy.sql import expression
 from datetime import datetime
-from sqlalchemy import select, desc #is not necessary as I am using flask_sqlalchemy 
+from sqlalchemy import select, desc, text #is not necessary as I am using flask_sqlalchemy 
 import pandas as pd
 
 app = Flask(__name__)
@@ -28,7 +28,7 @@ class User(db.Model):
     date_of_birth = db.Column(db.DateTime, nullable=True)
     team_member = db.Column(db.String(30), nullable = False)
     is_monitored = db.Column(db.Boolean, default=False, nullable=False)
-    adages_lifecycle = db.Column(db.Integer)
+    adages_lifecycle = db.Column(db.Integer, server_default=text("0"))
     shows=db.relationship('UserHistory', backref='employee', lazy=True)
 
 
@@ -64,7 +64,7 @@ class UserHistory(db.Model):
     date_of_birth = db.Column(db.DateTime, nullable=True)
     team_member = db.Column(db.String(30), nullable = False)
     is_monitored = db.Column(db.Boolean, default=False, nullable=False)
-    adages_lifecycle = db.Column(db.Integer)
+    adages_lifecycle = db.Column(db.Integer, server_default=text("0"))
     refresh_datetime = db.Column(db.DateTime, nullable=False)
 
     def __repr__(self):
@@ -158,7 +158,7 @@ def showAuditTrail():
         if modified_columns : 
             modification['MODIFIED_COLUMNS']=modified_columns
             audit_trail.append(modification)
-            
+
     return jsonify({'htmlresponse': render_template('response.html', audit_trail=audit_trail)})
         
 
